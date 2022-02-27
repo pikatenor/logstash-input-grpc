@@ -1,4 +1,4 @@
-package org.logstashplugins;
+package net.p1kachu.logstash.input.grpc;
 
 import co.elastic.logstash.api.Configuration;
 import co.elastic.logstash.api.Context;
@@ -15,8 +15,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
 
 // class name must match plugin name
-@LogstashPlugin(name="java_input_example")
-public class JavaInputExample implements Input {
+@LogstashPlugin(name="grpc")
+public class Grpc implements Input {
 
     public static final PluginConfigSpec<Long> EVENT_COUNT_CONFIG =
             PluginConfigSpec.numSetting("count", 3);
@@ -31,7 +31,7 @@ public class JavaInputExample implements Input {
     private volatile boolean stopped;
 
     // all plugins must provide a constructor that accepts id, Configuration, and Context
-    public JavaInputExample(String id, Configuration config, Context context) {
+    public Grpc(String id, Configuration config, Context context) {
         // constructors should validate configuration options
         this.id = id;
         count = config.get(EVENT_COUNT_CONFIG);
