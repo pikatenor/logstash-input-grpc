@@ -1,64 +1,117 @@
 package net.p1kachu.logstash.input.grpc
 
 import co.elastic.logstash.api.*
-import org.apache.commons.lang3.StringUtils
-import java.util.concurrent.CountDownLatch
-import kotlin.jvm.Volatile
+import com.google.common.collect.ImmutableList
+import com.google.common.net.HostAndPort
+import com.google.protobuf.DescriptorProtos.FileDescriptorSet
+import com.google.protobuf.DynamicMessage
+import com.google.protobuf.util.JsonFormat.TypeRegistry
+import io.grpc.CallOptions
+import io.grpc.ManagedChannel
+import io.grpc.stub.StreamObserver
+import me.dinowernli.grpc.polyglot.grpc.ChannelFactory
+import me.dinowernli.grpc.polyglot.grpc.DynamicGrpcClient
+import me.dinowernli.grpc.polyglot.io.MessageReader
+import me.dinowernli.grpc.polyglot.protobuf.ProtoMethodName
+import me.dinowernli.grpc.polyglot.protobuf.ServiceResolver
+import org.apache.logging.log4j.LogManager
 import kotlin.Throws
 import java.lang.InterruptedException
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
 
 // class name must match plugin name
 @LogstashPlugin(name = "grpc")
 class Grpc(private val id: String, config: Configuration, context: Context?) : Input {
-    private val count: Long
-    private val prefix: String
-    private val done = CountDownLatch(1)
+    private val logger = context?.getLogger(this) ?: LogManager.getLogger(Grpc::class.java)
 
-    @Volatile
-    private var stopped = false
+    private val protoset: FileDescriptorSet
+    private val channel: ManagedChannel
+    private val client: DynamicGrpcClient
+    private val message: ImmutableList<DynamicMessage>
 
-    // all plugins must provide a constructor that accepts id, Configuration, and Context
     init {
         // constructors should validate configuration options
-        count = config.get(EVENT_COUNT_CONFIG)
-        prefix = config.get(PREFIX_CONFIG)
+        val protosetPath = Paths.get(
+            config.get(PROTOSET_PATH) ?: throw IllegalArgumentException("parameter protoset_path is required"))
+        val host = HostAndPort.fromParts(
+            config.get(HOSTNAME) ?: throw IllegalArgumentException("parameter host is required"),
+            config.get(PORT)?.toInt() ?: throw IllegalArgumentException("parameter host is required")
+        )
+        val grpcMethodName = ProtoMethodName.parseFullGrpcMethodName(
+            config.get(RPC_NAME) ?: throw IllegalArgumentException("parameter rpc is required")
+        )
+        val messageJson = config.get(MESSAGE) ?: throw IllegalArgumentException("parameter message_json is required")
+        val useTls = config.get(USE_TLS)
+        val caPath = config.get(CA_PATH)
+
+        logger.debug("reading protoset from $protosetPath")
+        protoset = FileDescriptorSet.parseFrom(Files.readAllBytes(protosetPath))
+
+        logger.info("creating channel to $host, ${grpcMethodName.fullServiceName}")
+        val channelFactory = ChannelFactory.create(useTls, caPath)
+        channel = channelFactory.createChannel(host)
+
+        logger.info("creating dynamic grpc client")
+        val serviceResolver = ServiceResolver.fromFileDescriptorSet(protoset)
+        val methodDescriptor = serviceResolver.resolveServiceMethod(grpcMethodName)
+        if (!methodDescriptor.isServerStreaming) {
+            throw RuntimeException("currently this plugin only supports server streaming rpc")
+        }
+        client = DynamicGrpcClient.create(methodDescriptor, channel)
+        val registry = TypeRegistry.newBuilder().apply {
+            add(serviceResolver.listMessageTypes())
+        }.build()
+
+        logger.info("building rpc message")
+        message = MessageReader.forString(messageJson, methodDescriptor.inputType, registry).read()
     }
 
     override fun start(consumer: Consumer<Map<String, Any>>) {
-
-        // The start method should push Map<String, Object> instances to the supplied QueueWriter
-        // instance. Those will be converted to Event instances later in the Logstash event
-        // processing pipeline.
-        //
-        // Inputs that operate on unbounded streams of data or that poll indefinitely for new
-        // events should loop indefinitely until they receive a stop request. Inputs that produce
-        // a finite sequence of events should loop until that sequence is exhausted or until they
-        // receive a stop request, whichever comes first.
-        var eventCount = 0
-        try {
-            while (!stopped && eventCount < count) {
-                eventCount++
-                consumer.accept(mapOf(Pair("message", "$prefix  $eventCount of $count")))
+        val observer = object : StreamObserver<DynamicMessage> {
+            val map = mutableMapOf<String, Any>() // reuse map to reduce allocations and GC pressure
+            override fun onNext(value: DynamicMessage) {
+                map.clear()
+                value.allFields.forEach {
+                    map[it.key.jsonName] = it.value
+                }
+                consumer.accept(map)
             }
-        } finally {
-            stopped = true
-            done.countDown()
+            override fun onError(t: Throwable) {
+                logger.error(t)
+            }
+            override fun onCompleted() {
+                logger.info("rpc call ended successfully")
+            }
         }
+        client.call(message, observer, CallOptions.DEFAULT).get()
+        channel.shutdown()
     }
 
     override fun stop() {
-        stopped = true // set flag to request cooperative stop of input
+        logger.info("closing channel")
+        channel.shutdownNow()
     }
 
     @Throws(InterruptedException::class)
     override fun awaitStop() {
-        done.await() // blocks until input has stopped
+        logger.info("waiting channel to be closed")
+        channel.awaitTermination(5, TimeUnit.SECONDS)
     }
 
     override fun configSchema(): Collection<PluginConfigSpec<*>> {
         // should return a list of all configuration options for this plugin
-        return listOf<PluginConfigSpec<*>>(EVENT_COUNT_CONFIG, PREFIX_CONFIG)
+        return listOf(
+            PROTOSET_PATH,
+            HOSTNAME,
+            PORT,
+            USE_TLS,
+            CA_PATH,
+            RPC_NAME,
+            MESSAGE,
+        )
     }
 
     override fun getId(): String {
@@ -67,8 +120,18 @@ class Grpc(private val id: String, config: Configuration, context: Context?) : I
 
     companion object {
         @JvmField
-        val EVENT_COUNT_CONFIG: PluginConfigSpec<Long> = PluginConfigSpec.numSetting("count", 3)
+        val PROTOSET_PATH: PluginConfigSpec<String?> = PluginConfigSpec.requiredStringSetting("protoset_path")
         @JvmField
-        val PREFIX_CONFIG: PluginConfigSpec<String> = PluginConfigSpec.stringSetting("prefix", "message")
+        val HOSTNAME: PluginConfigSpec<String?> = PluginConfigSpec.requiredStringSetting("host")
+        @JvmField
+        val PORT: PluginConfigSpec<Long?> = PluginConfigSpec.numSetting("port")
+        @JvmField
+        val USE_TLS: PluginConfigSpec<Boolean> = PluginConfigSpec.booleanSetting("use_tls", true)
+        @JvmField
+        val CA_PATH: PluginConfigSpec<String?> = PluginConfigSpec.stringSetting("ca_path", "")
+        @JvmField
+        val RPC_NAME: PluginConfigSpec<String?> = PluginConfigSpec.requiredStringSetting("rpc")
+        @JvmField
+        val MESSAGE: PluginConfigSpec<String?> = PluginConfigSpec.requiredStringSetting("message_json")
     }
 }
