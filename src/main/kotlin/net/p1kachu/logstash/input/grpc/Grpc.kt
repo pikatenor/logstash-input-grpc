@@ -11,9 +11,9 @@ import io.grpc.ManagedChannel
 import io.grpc.stub.StreamObserver
 import me.dinowernli.grpc.polyglot.grpc.ChannelFactory
 import me.dinowernli.grpc.polyglot.grpc.DynamicGrpcClient
-import me.dinowernli.grpc.polyglot.io.MessageReader
 import me.dinowernli.grpc.polyglot.protobuf.ProtoMethodName
 import me.dinowernli.grpc.polyglot.protobuf.ServiceResolver
+import net.p1kachu.logstash.input.grpc.util.DynamicMessageBuilder
 import org.apache.logging.log4j.LogManager
 import kotlin.Throws
 import java.lang.InterruptedException
@@ -35,15 +35,20 @@ class Grpc(private val id: String, config: Configuration, context: Context?) : I
     init {
         // constructors should validate configuration options
         val protosetPath = Paths.get(
-            config.get(PROTOSET_PATH) ?: throw IllegalArgumentException("parameter protoset_path is required"))
+            config.get(PROTOSET_PATH) ?: throw IllegalArgumentException("parameter ${PROTOSET_PATH.name()} is required")
+        )
         val host = HostAndPort.fromParts(
-            config.get(HOSTNAME) ?: throw IllegalArgumentException("parameter host is required"),
-            config.get(PORT)?.toInt() ?: throw IllegalArgumentException("parameter host is required")
+            config.get(HOSTNAME) ?: throw IllegalArgumentException("parameter ${HOSTNAME.name()} is required"),
+            config.get(PORT)?.toInt() ?: throw IllegalArgumentException("parameter ${PORT.name()} is required")
         )
         val grpcMethodName = ProtoMethodName.parseFullGrpcMethodName(
-            config.get(RPC_NAME) ?: throw IllegalArgumentException("parameter rpc is required")
+            config.get(RPC_NAME) ?: throw IllegalArgumentException("parameter ${RPC_NAME.name()} is required")
         )
-        val messageJson = config.get(MESSAGE) ?: throw IllegalArgumentException("parameter message_json is required")
+        val messageHash = config.get(MESSAGE)
+        val messageJson = config.get(MESSAGE_JSON)
+        if (messageJson == null && messageHash == null) {
+            throw IllegalArgumentException("parameter ${MESSAGE.name()} or ${MESSAGE_JSON.name()} is required")
+        }
         val useTls = config.get(USE_TLS)
         val caPath = config.get(CA_PATH)
 
@@ -66,7 +71,10 @@ class Grpc(private val id: String, config: Configuration, context: Context?) : I
         }.build()
 
         logger.info("building rpc message")
-        message = MessageReader.forString(messageJson, methodDescriptor.inputType, registry).read()
+        val builder = DynamicMessageBuilder(methodDescriptor.inputType, registry)
+        messageJson?.let { builder.forString(it) }
+        messageHash?.let { builder.forHashMap(it) }
+        message = builder.build()
     }
 
     override fun start(consumer: Consumer<Map<String, Any>>) {
@@ -111,6 +119,7 @@ class Grpc(private val id: String, config: Configuration, context: Context?) : I
             CA_PATH,
             RPC_NAME,
             MESSAGE,
+            MESSAGE_JSON,
         )
     }
 
@@ -132,6 +141,8 @@ class Grpc(private val id: String, config: Configuration, context: Context?) : I
         @JvmField
         val RPC_NAME: PluginConfigSpec<String?> = PluginConfigSpec.requiredStringSetting("rpc")
         @JvmField
-        val MESSAGE: PluginConfigSpec<String?> = PluginConfigSpec.requiredStringSetting("message_json")
+        val MESSAGE: PluginConfigSpec<MutableMap<String, Any?>?> = PluginConfigSpec.hashSetting("message")
+        @JvmField
+        val MESSAGE_JSON: PluginConfigSpec<String?> = PluginConfigSpec.stringSetting("message_json")
     }
 }
