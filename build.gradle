@@ -10,12 +10,12 @@ apply from: LOGSTASH_CORE_PATH + "/../rubyUtils.gradle"
 // ===========================================================================
 group                      'net.p1kachu.logstash.input.grpc' // must match the package of the main plugin class
 version                    "${file("VERSION").text.trim()}" // read from required VERSION file
-description                = "Example Java input implementation"
+description                = "Logstash input plugin for gRPC (stream)"
 pluginInfo.licenses        = ['Apache-2.0'] // list of SPDX license IDs
 pluginInfo.longDescription = "This gem is a Logstash plugin required to be installed on top of the Logstash core pipeline using \$LS_HOME/bin/logstash-plugin install gemname. This gem is not a stand-alone program"
 pluginInfo.authors         = ['pikatenor']
 pluginInfo.email           = ['pikatenor@p1kachu.net']
-pluginInfo.homepage        = "https://p1kachu.net/TBD"
+pluginInfo.homepage        = "https://github.com/pikatenor/logstash-input-grpc"
 pluginInfo.pluginType      = "input"
 pluginInfo.pluginClass     = "Grpc"
 pluginInfo.pluginName      = "grpc" // must match the @LogstashPlugin annotation in the main plugin class
