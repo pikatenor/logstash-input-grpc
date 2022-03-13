@@ -3,6 +3,7 @@ package net.p1kachu.logstash.input.grpc
 import co.elastic.logstash.api.*
 import com.google.common.collect.ImmutableList
 import com.google.common.net.HostAndPort
+import com.google.gson.JsonObject
 import com.google.protobuf.DescriptorProtos.FileDescriptorSet
 import com.google.protobuf.DynamicMessage
 import com.google.protobuf.util.JsonFormat.TypeRegistry
