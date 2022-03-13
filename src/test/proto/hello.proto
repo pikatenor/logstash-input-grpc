@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package hello;
+
+option java_package = "net.p1kachu.proto.hellostreamingworld";
+option go_package = "git.p1kachu.net/testing-proto/go/services/hello";
+
+service MultiGreeter {
+  rpc SayHello (HelloRequest) returns (stream HelloReply) {}
+}
+
+message HelloRequest {
+  message Data {
+    string name = 1;
+  }
+  uint32 number = 1;
+  Data data = 2;
+}
+
+message HelloReply {
+  string message = 1;
+}
