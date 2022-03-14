@@ -45,4 +45,4 @@ jobs:
       with:
         gradle-version: current
         build-root-directory: logstash-input-grpc
-        arguments: test -PLOGSTASH_CORE_PATH=${{ env.GITHUB_WORKSPACE }}/logstash/logstash-core
+        arguments: test -PLOGSTASH_CORE_PATH=${{ github.workspace }}/logstash/logstash-core
