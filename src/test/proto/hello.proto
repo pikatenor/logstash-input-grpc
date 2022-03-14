@@ -19,4 +19,36 @@ message HelloRequest {
 
 message HelloReply {
   string message = 1;
+
+  double   double_value   = 2;
+  float    float_value    = 3;
+  int32    int32_value    = 4;
+  int64    int64_value    = 5;
+  uint32   uint32_value   = 6;
+  uint64   uint64_value   = 7;
+  sint32   sint32_value   = 8;
+  sint64   sint64_value   = 9;
+  fixed32  fixed32_value  = 10;
+  fixed64  fixed64_value  = 11;
+  sfixed32 sfixed32_value = 12;
+  sfixed64 sfixed64_value = 13;
+  bool     boolean_value  = 14;
+  string   string_value   = 15;
+  bytes    bytes_value    = 16;
+
+  Enum enum_value = 17;
+
+  Data nested = 18;
+
+  repeated string repeated_string = 19;
+  repeated Data   repeated_nested = 20;
+
+  message Data {
+    string nested_string = 1;
+  }
+
+  enum Enum {
+    ZERO = 0;
+    ONE = 1;
+  }
 }

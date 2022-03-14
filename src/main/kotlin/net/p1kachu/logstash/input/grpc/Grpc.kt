@@ -3,7 +3,6 @@ package net.p1kachu.logstash.input.grpc
 import co.elastic.logstash.api.*
 import com.google.common.collect.ImmutableList
 import com.google.common.net.HostAndPort
-import com.google.gson.JsonObject
 import com.google.protobuf.DescriptorProtos.FileDescriptorSet
 import com.google.protobuf.DynamicMessage
 import com.google.protobuf.util.JsonFormat.TypeRegistry
@@ -15,6 +14,7 @@ import me.dinowernli.grpc.polyglot.grpc.DynamicGrpcClient
 import me.dinowernli.grpc.polyglot.protobuf.ProtoMethodName
 import me.dinowernli.grpc.polyglot.protobuf.ServiceResolver
 import net.p1kachu.logstash.input.grpc.util.DynamicMessageBuilder
+import net.p1kachu.logstash.input.grpc.util.toMap
 import org.apache.logging.log4j.LogManager
 import kotlin.Throws
 import java.lang.InterruptedException
@@ -80,13 +80,8 @@ class Grpc(private val id: String, config: Configuration, context: Context?) : I
 
     override fun start(consumer: Consumer<Map<String, Any>>) {
         val observer = object : StreamObserver<DynamicMessage> {
-            val map = mutableMapOf<String, Any>() // reuse map to reduce allocations and GC pressure
             override fun onNext(value: DynamicMessage) {
-                map.clear()
-                value.allFields.forEach {
-                    map[it.key.jsonName] = it.value
-                }
-                consumer.accept(map)
+                consumer.accept(value.toMap())
             }
             override fun onError(t: Throwable) {
                 logger.error(t)
