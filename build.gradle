@@ -87,6 +87,7 @@ dependencies {
     testImplementation 'org.jruby:jruby-complete:9.3.3.0'
     testImplementation "io.grpc:grpc-protobuf:1.45.0"
     testImplementation "javax.annotation:javax.annotation-api:1.3.2"
+    testImplementation "org.jetbrains.kotlin:kotlin-script-runtime:$kotlin_version"
 }
 
 clean {

@@ -47,11 +47,14 @@ class TestGreeterServer : MultiGreeterGrpc.MultiGreeterImplBase() {
     }
 
     companion object {
-        fun start(): Server {
+        fun start(port: Int? = null): Server {
             // find random available port
-            val tmp = ServerSocket(0)
-            val port = tmp.localPort
-            tmp.close()
+            if (port == null) {
+                val tmp = ServerSocket(0)
+                val availablePort = tmp.localPort
+                tmp.close()
+                return start(availablePort)
+            }
 
             return NettyServerBuilder
                 .forPort(port)
