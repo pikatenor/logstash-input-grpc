@@ -48,4 +48,4 @@ jobs:
       with:
         prerelease: true
         files: |
-          logstash-input-grpc-**.gem
+          logstash-input-grpc-*.gem
