@@ -62,7 +62,7 @@ class GrpcInputTest {
             Assert.assertEquals((-13).toLong(), it["sfixed64_value"])
             Assert.assertEquals(true, it["boolean_value"])
             Assert.assertEquals("string", it["string_value"])
-            Assert.assertEquals("16", it["bytes_value"])
+            Assert.assertEquals("MTY=", it["bytes_value"])
             Assert.assertEquals("ONE", it["enum_value"])
 
             Assert.assertTrue(it["nested"] is Map<*, *>)

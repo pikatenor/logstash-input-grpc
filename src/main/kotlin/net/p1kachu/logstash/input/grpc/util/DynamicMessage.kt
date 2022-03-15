@@ -9,6 +9,8 @@ import com.google.protobuf.DynamicMessage
 import com.google.protobuf.MapEntry
 import com.google.protobuf.util.JsonFormat
 import com.google.protobuf.util.JsonFormat.TypeRegistry
+import java.nio.charset.Charset
+import java.util.Base64
 
 class DynamicMessageBuilder(private val descriptor: Descriptor, registry: TypeRegistry) {
     private val jsonParser: JsonFormat.Parser = JsonFormat.parser().usingTypeRegistry(registry)
@@ -52,7 +54,7 @@ private fun convertSingleValue(descriptor: FieldDescriptor, value: Any): Any {
         FieldDescriptor.JavaType.STRING ->
             value
         FieldDescriptor.JavaType.BYTE_STRING ->
-            (value as ByteString).toStringUtf8()
+            Base64.getEncoder().encodeToString((value as ByteString).toByteArray())
         FieldDescriptor.JavaType.ENUM ->
             value.toString()
         FieldDescriptor.JavaType.MESSAGE ->
