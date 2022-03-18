@@ -18,10 +18,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         path: logstash-input-grpc
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         path: logstash
         repository: elastic/logstash
