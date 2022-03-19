@@ -2,7 +2,7 @@
 
 This is a Logstash input plugin for gRPC.
 
-This plugin sends RPC requests to other gRPC services and emits the corresponding response as a Logstash event.
+This plugin send a RPC request to the other gRPC service and emits the corresponding response as a Logstash event.
 
 Currently, this plugin only supports server-side streaming RPC.
 
@@ -18,9 +18,9 @@ input {
    host => "localhost"
    # remote server's port.
    port => 50051
-   # whether to use TLS connection to server.
+   # whether to use TLS connection to server. (optional; default to true)
    use_tls => false
-   # path to CA certificate to verify server.
+   # path to CA certificate to verify server. (optional)
    ca_path => "/path/to/ca.crt"
 
    # fully qualified method name to call. 'service/method' syntax.
@@ -35,6 +35,9 @@ input {
      }
      number => 10
    }
+
+   # use lowerCamelCased field name instead of original proto field name. (optional; default to false)
+   use_json_name => false
   }
 }
 ```
