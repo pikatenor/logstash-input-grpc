@@ -2,11 +2,10 @@ package net.p1kachu.logstash.input.grpc
 
 import io.grpc.Server
 import org.junit.After
-import org.logstash.plugins.ConfigurationImpl
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
-import java.util.ArrayList
+import org.logstash.plugins.ConfigurationImpl
 import java.util.function.Consumer
 
 class GrpcInputTest {

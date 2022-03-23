@@ -6,10 +6,8 @@ import com.google.protobuf.ByteString
 import com.google.protobuf.Descriptors.Descriptor
 import com.google.protobuf.Descriptors.FieldDescriptor
 import com.google.protobuf.DynamicMessage
-import com.google.protobuf.MapEntry
 import com.google.protobuf.util.JsonFormat
 import com.google.protobuf.util.JsonFormat.TypeRegistry
-import java.nio.charset.Charset
 import java.util.Base64
 
 class DynamicMessageBuilder(private val descriptor: Descriptor, registry: TypeRegistry) {
@@ -32,20 +30,20 @@ class DynamicMessageBuilder(private val descriptor: Descriptor, registry: TypeRe
     }
 }
 
-fun DynamicMessage.toMap(): Map<String, Any> = this.allFields.entries.associate {
-    it.key.name to convertProtoValue(it.key, it.value)
+fun DynamicMessage.toMap(useJsonName: Boolean = false): Map<String, Any> = this.allFields.entries.associate {
+    if (useJsonName) { it.key.jsonName } else { it.key.name } to convertProtoValue(it.key, it.value, useJsonName)
 }
 
-private fun convertProtoValue(descriptor: FieldDescriptor, value: Any): Any {
-    if(descriptor.isRepeated) {
-        return (value as Collection<*>).map { convertSingleValue(descriptor, it!!) }
+private fun convertProtoValue(descriptor: FieldDescriptor, value: Any, useJsonName: Boolean): Any {
+    if (descriptor.isRepeated) {
+        return (value as Collection<*>).map { convertSingleValue(descriptor, it!!, useJsonName) }
     }
-    return convertSingleValue(descriptor, value)
+    return convertSingleValue(descriptor, value, useJsonName)
 }
 
-private fun convertSingleValue(descriptor: FieldDescriptor, value: Any): Any {
+private fun convertSingleValue(descriptor: FieldDescriptor, value: Any, useJsonName: Boolean): Any {
     @Suppress("WHEN_ENUM_CAN_BE_NULL_IN_JAVA")
-    return when(descriptor.javaType) {
+    return when (descriptor.javaType) {
         FieldDescriptor.JavaType.INT,
         FieldDescriptor.JavaType.LONG,
         FieldDescriptor.JavaType.FLOAT,
@@ -58,6 +56,6 @@ private fun convertSingleValue(descriptor: FieldDescriptor, value: Any): Any {
         FieldDescriptor.JavaType.ENUM ->
             value.toString()
         FieldDescriptor.JavaType.MESSAGE ->
-            (value as DynamicMessage).toMap()
+            (value as DynamicMessage).toMap(useJsonName)
     }
 }

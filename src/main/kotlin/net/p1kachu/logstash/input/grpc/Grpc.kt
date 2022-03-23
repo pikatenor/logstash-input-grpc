@@ -28,6 +28,8 @@ import java.util.function.Consumer
 class Grpc(private val id: String, config: Configuration, context: Context?) : Input {
     private val logger = context?.getLogger(this) ?: LogManager.getLogger(Grpc::class.java)
 
+    private val useJsonName: Boolean
+
     private val protoset: FileDescriptorSet
     private val channel: ManagedChannel
     private val client: DynamicGrpcClient
@@ -52,6 +54,7 @@ class Grpc(private val id: String, config: Configuration, context: Context?) : I
         }
         val useTls = config.get(USE_TLS)
         val caPath = config.get(CA_PATH)
+        useJsonName = config.get(USE_JSON_NAME)
 
         logger.debug("reading protoset from $protosetPath")
         protoset = FileDescriptorSet.parseFrom(Files.readAllBytes(protosetPath))
@@ -67,6 +70,7 @@ class Grpc(private val id: String, config: Configuration, context: Context?) : I
             throw RuntimeException("currently this plugin only supports server streaming rpc")
         }
         client = DynamicGrpcClient.create(methodDescriptor, channel)
+
         val registry = TypeRegistry.newBuilder().apply {
             add(serviceResolver.listMessageTypes())
         }.build()
@@ -81,7 +85,7 @@ class Grpc(private val id: String, config: Configuration, context: Context?) : I
     override fun start(consumer: Consumer<Map<String, Any>>) {
         val observer = object : StreamObserver<DynamicMessage> {
             override fun onNext(value: DynamicMessage) {
-                consumer.accept(value.toMap())
+                consumer.accept(value.toMap(useJsonName))
             }
             override fun onError(t: Throwable) {
                 logger.error(t)
@@ -116,6 +120,7 @@ class Grpc(private val id: String, config: Configuration, context: Context?) : I
             RPC_NAME,
             MESSAGE,
             MESSAGE_JSON,
+            USE_JSON_NAME,
         )
     }
 
@@ -140,5 +145,7 @@ class Grpc(private val id: String, config: Configuration, context: Context?) : I
         val MESSAGE: PluginConfigSpec<MutableMap<String, Any?>?> = PluginConfigSpec.hashSetting("message")
         @JvmField
         val MESSAGE_JSON: PluginConfigSpec<String?> = PluginConfigSpec.stringSetting("message_json")
+        @JvmField
+        val USE_JSON_NAME: PluginConfigSpec<Boolean> = PluginConfigSpec.booleanSetting("use_json_name", false)
     }
 }
