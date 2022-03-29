@@ -80,7 +80,7 @@ dependencies {
     implementation 'com.google.guava:guava:31.1-jre'
     implementation "io.grpc:grpc-core:1.45.0"
     implementation "io.grpc:grpc-stub:1.45.0"
-    implementation "io.grpc:grpc-netty:1.45.0"
+    implementation "io.grpc:grpc-netty:1.45.1"
     implementation fileTree(dir: LOGSTASH_CORE_PATH, include: "**/logstash-core-?.*.*.jar")
 
     testImplementation 'junit:junit:4.13.2'
