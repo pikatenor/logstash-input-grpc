@@ -1,5 +1,24 @@
 {
-  "extends": [
-    "config:base"
-  ]
+  extends: ["config:base"],
+
+  labels: ["dependencies"],
+
+  pin: {
+    automerge: true,
+  },
+  patch: {
+    stabilityDays: 3,
+    automerge: true,
+  },
+
+  packageRules: [
+    {
+      matchSourceUrls: ["https://github.com/grpc/grpc-java"],
+      groupName: "gRPC",
+    },
+    {
+      matchDepTypes: ["action"],
+      automerge: true,
+    },
+  ],
 }
