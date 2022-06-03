@@ -6,6 +6,8 @@ This plugin send a RPC request to the other gRPC service and emits the correspon
 
 Currently, this plugin only supports server-side streaming RPC.
 
+[Blog Post (Japanese) マイクロサービスのデータぜんぶ抜く……gRPCで！ - Retty Tech Blog](https://engineer.retty.me/entry/2022/06/03/173923)
+
 ## Configulation
 ```
 input {
