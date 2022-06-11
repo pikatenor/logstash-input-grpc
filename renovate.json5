@@ -35,7 +35,7 @@
     {
       fileMatch: ["^\\.github/workflows/.+\\.yml$"],
       matchStrings: [
-        "^\\s*LOGSTASH_VERSION:\\s*(?<currentValue>.*?)$",
+        "LOGSTASH_VERSION:\\s*(?<currentValue>.*?)\\n",
       ],
       depNameTemplate: "elastic/logstash",
       datasourceTemplate: "github-tags",
