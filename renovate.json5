@@ -18,7 +18,11 @@
   packageRules: [
     {
       matchSourceUrls: ["https://github.com/grpc/grpc-java"],
-      groupName: "gRPC",
+      groupName: "grpc-java",
+    },
+    {
+      matchSourceUrls: ["https://github.com/protocolbuffers/protobuf"],
+      groupName: "protobuf",
     },
     {
       matchDepTypes: ["action"],
