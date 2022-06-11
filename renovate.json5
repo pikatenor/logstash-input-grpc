@@ -30,4 +30,16 @@
       stabilityDays: 0,
     },
   ],
+
+  regexManagers: [
+    {
+      fileMatch: ["^\\.github/workflows/.+\\.yml$"],
+      matchStrings: [
+        "^\\s*LOGSTASH_VERSION:\\s*(?<currentValue>.*?)$",
+      ],
+      depNameTemplate: "elastic/logstash",
+      datasourceTemplate: "github-tags",
+      versioningTemplate: "semver-coerced",
+    },
+  ],
 }
