@@ -1,6 +1,8 @@
 package me.dinowernli.grpc.polyglot.grpc;
 
 import java.io.File;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -13,11 +15,11 @@ import com.google.common.net.HostAndPort;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.grpc.*;
-import io.grpc.netty.GrpcSslContexts;
-import io.grpc.netty.NegotiationType;
-import io.grpc.netty.NettyChannelBuilder;
-import io.netty.handler.ssl.SslContext;
-import io.netty.handler.ssl.SslContextBuilder;
+import io.grpc.netty.shaded.io.grpc.netty.GrpcSslContexts;
+import io.grpc.netty.shaded.io.grpc.netty.NegotiationType;
+import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
+import io.grpc.netty.shaded.io.netty.handler.ssl.SslContext;
+import io.grpc.netty.shaded.io.netty.handler.ssl.SslContextBuilder;
 
 import static com.google.common.util.concurrent.MoreExecutors.listeningDecorator;
 
@@ -47,12 +49,13 @@ public class ChannelFactory {
   }
 
   private NettyChannelBuilder createChannelBuilder(HostAndPort endpoint) {
+    SocketAddress address = new InetSocketAddress(endpoint.getHost(), endpoint.getPort());
     if (!useTls) {
-      return NettyChannelBuilder.forAddress(endpoint.getHost(), endpoint.getPort())
+      return NettyChannelBuilder.forAddress(address)
           .negotiationType(NegotiationType.PLAINTEXT)
           .intercept(metadataInterceptor());
     } else {
-      return NettyChannelBuilder.forAddress(endpoint.getHost(), endpoint.getPort())
+      return NettyChannelBuilder.forAddress(address)
           .sslContext(createSslContext())
           .negotiationType(NegotiationType.TLS)
           .intercept(metadataInterceptor());
