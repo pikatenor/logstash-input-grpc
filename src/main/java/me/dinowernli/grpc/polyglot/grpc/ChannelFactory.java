@@ -1,8 +1,6 @@
 package me.dinowernli.grpc.polyglot.grpc;
 
 import java.io.File;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -49,13 +47,12 @@ public class ChannelFactory {
   }
 
   private NettyChannelBuilder createChannelBuilder(HostAndPort endpoint) {
-    SocketAddress address = new InetSocketAddress(endpoint.getHost(), endpoint.getPort());
     if (!useTls) {
-      return NettyChannelBuilder.forAddress(address)
+      return NettyChannelBuilder.forAddress(endpoint.getHost(), endpoint.getPort())
           .negotiationType(NegotiationType.PLAINTEXT)
           .intercept(metadataInterceptor());
     } else {
-      return NettyChannelBuilder.forAddress(address)
+      return NettyChannelBuilder.forAddress(endpoint.getHost(), endpoint.getPort())
           .sslContext(createSslContext())
           .negotiationType(NegotiationType.TLS)
           .intercept(metadataInterceptor());
