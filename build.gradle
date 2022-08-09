@@ -52,7 +52,7 @@ apply plugin: 'com.google.protobuf'
 
 protobuf {
     protoc {
-        artifact = 'com.google.protobuf:protoc:3.21.4'
+        artifact = 'com.google.protobuf:protoc:3.21.5'
     }
     plugins {
         grpc {
@@ -75,8 +75,8 @@ dependencies {
     implementation 'org.apache.commons:commons-lang3:3.12.0'
     implementation 'org.apache.logging.log4j:log4j-api:2.18.0'
     implementation 'org.apache.logging.log4j:log4j-core:2.18.0'
-    implementation 'com.google.protobuf:protobuf-java:3.21.4'
-    implementation 'com.google.protobuf:protobuf-java-util:3.21.4'
+    implementation 'com.google.protobuf:protobuf-java:3.21.5'
+    implementation 'com.google.protobuf:protobuf-java-util:3.21.5'
     implementation 'com.google.guava:guava:31.1-jre'
     implementation "io.grpc:grpc-core:1.48.1"
     implementation "io.grpc:grpc-stub:1.48.1"
