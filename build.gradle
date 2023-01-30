@@ -46,6 +46,7 @@ apply plugin: 'com.github.johnrengelman.shadow'
 
 shadowJar {
     archiveClassifier = null
+    mergeServiceFiles()
 }
 
 apply plugin: 'com.google.protobuf'
