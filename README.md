@@ -41,6 +41,9 @@ input {
    # use lowerCamelCased field name instead of original proto field name. (optional; default to false)
    use_json_name => false
    
+   # how long to wait for a call to complete in millisecond. (optional)
+   deadline_ms => 4000
+
    # client retry policy. (optional)
    # see: https://github.com/grpc/proposal/blob/master/A6-client-retries.md#retry-policy-capabilities.
    retry_policy => {

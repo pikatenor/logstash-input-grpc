@@ -7,6 +7,7 @@ import com.google.protobuf.DescriptorProtos.FileDescriptorSet
 import com.google.protobuf.DynamicMessage
 import com.google.protobuf.util.JsonFormat.TypeRegistry
 import io.grpc.CallOptions
+import io.grpc.Deadline
 import io.grpc.ManagedChannel
 import io.grpc.stub.StreamObserver
 import me.dinowernli.grpc.polyglot.grpc.ChannelFactory
@@ -29,11 +30,20 @@ class Grpc(private val id: String, config: Configuration, context: Context?) : I
     private val logger = context?.getLogger(this) ?: LogManager.getLogger(Grpc::class.java)
 
     private val useJsonName: Boolean
+    private val deadlineMs: Long?
 
     private val protoset: FileDescriptorSet
     private val channel: ManagedChannel
     private val client: DynamicGrpcClient
     private val message: ImmutableList<DynamicMessage>
+    private val callOptions: CallOptions
+        get() {
+            var callOptions = CallOptions.DEFAULT
+            if (deadlineMs != null) {
+                callOptions = callOptions.withDeadlineAfter(deadlineMs, TimeUnit.MILLISECONDS)
+            }
+            return callOptions
+        }
 
     init {
         // constructors should validate configuration options
@@ -56,6 +66,7 @@ class Grpc(private val id: String, config: Configuration, context: Context?) : I
         val caPath = config.get(CA_PATH)
         useJsonName = config.get(USE_JSON_NAME)
         val retryPolicy = config.get(RETRY_POLICY)
+        deadlineMs = config.get(DEADLINE_MS)
 
         logger.debug("reading protoset from $protosetPath")
         protoset = FileDescriptorSet.parseFrom(Files.readAllBytes(protosetPath))
@@ -83,6 +94,7 @@ class Grpc(private val id: String, config: Configuration, context: Context?) : I
         message = builder.build()
     }
 
+
     override fun start(consumer: Consumer<Map<String, Any>>) {
         val observer = object : StreamObserver<DynamicMessage> {
             override fun onNext(value: DynamicMessage) {
@@ -95,7 +107,7 @@ class Grpc(private val id: String, config: Configuration, context: Context?) : I
                 logger.info("rpc call ended successfully")
             }
         }
-        client.call(message, observer, CallOptions.DEFAULT).get()
+        client.call(message, observer, callOptions).get()
         channel.shutdown()
     }
 
@@ -122,6 +134,7 @@ class Grpc(private val id: String, config: Configuration, context: Context?) : I
             MESSAGE,
             MESSAGE_JSON,
             USE_JSON_NAME,
+            DEADLINE_MS,
             RETRY_POLICY,
         )
     }
@@ -149,6 +162,8 @@ class Grpc(private val id: String, config: Configuration, context: Context?) : I
         val MESSAGE_JSON: PluginConfigSpec<String?> = PluginConfigSpec.stringSetting("message_json")
         @JvmField
         val USE_JSON_NAME: PluginConfigSpec<Boolean> = PluginConfigSpec.booleanSetting("use_json_name", false)
+        @JvmField
+        val DEADLINE_MS: PluginConfigSpec<Long?> = PluginConfigSpec.numSetting("deadline_ms")
         @JvmField
         val RETRY_POLICY: PluginConfigSpec<MutableMap<String, Any?>?> = PluginConfigSpec.hashSetting("retry_policy")
     }
