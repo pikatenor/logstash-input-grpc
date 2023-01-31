@@ -40,6 +40,18 @@ input {
 
    # use lowerCamelCased field name instead of original proto field name. (optional; default to false)
    use_json_name => false
+   
+   # client retry policy. (optional)
+   # see: https://github.com/grpc/proposal/blob/master/A6-client-retries.md#retry-policy-capabilities.
+   retry_policy => {
+     maxAttempts => 4
+     initialBackoff => "0.1s"
+     maxBackoff => "1s"
+     backoffMultiplier => 2.0
+     retryableStatusCodes => [
+       "UNAVAILABLE"
+     ]
+   }
   }
 }
 ```

@@ -55,12 +55,13 @@ class Grpc(private val id: String, config: Configuration, context: Context?) : I
         val useTls = config.get(USE_TLS)
         val caPath = config.get(CA_PATH)
         useJsonName = config.get(USE_JSON_NAME)
+        val retryPolicy = config.get(RETRY_POLICY)
 
         logger.debug("reading protoset from $protosetPath")
         protoset = FileDescriptorSet.parseFrom(Files.readAllBytes(protosetPath))
 
         logger.info("creating channel to $host, ${grpcMethodName.fullServiceName}")
-        val channelFactory = ChannelFactory.create(useTls, caPath)
+        val channelFactory = ChannelFactory.create(useTls, caPath, retryPolicy)
         channel = channelFactory.createChannel(host)
 
         logger.info("creating dynamic grpc client")
@@ -121,6 +122,7 @@ class Grpc(private val id: String, config: Configuration, context: Context?) : I
             MESSAGE,
             MESSAGE_JSON,
             USE_JSON_NAME,
+            RETRY_POLICY,
         )
     }
 
@@ -147,5 +149,7 @@ class Grpc(private val id: String, config: Configuration, context: Context?) : I
         val MESSAGE_JSON: PluginConfigSpec<String?> = PluginConfigSpec.stringSetting("message_json")
         @JvmField
         val USE_JSON_NAME: PluginConfigSpec<Boolean> = PluginConfigSpec.booleanSetting("use_json_name", false)
+        @JvmField
+        val RETRY_POLICY: PluginConfigSpec<MutableMap<String, Any?>?> = PluginConfigSpec.hashSetting("retry_policy")
     }
 }
