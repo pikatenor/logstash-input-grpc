@@ -33,14 +33,14 @@ jobs:
         distribution: temurin
 
     - name: Build logstash-core
-      uses: gradle/gradle-build-action@v2.4.0
+      uses: gradle/gradle-build-action@v2.4.1
       with:
         gradle-version: current
         build-root-directory: logstash
         arguments: assemble
     
     - name: Build gem
-      uses: gradle/gradle-build-action@v2.4.0
+      uses: gradle/gradle-build-action@v2.4.1
       with:
         gradle-version: current
         build-root-directory: logstash-input-grpc
