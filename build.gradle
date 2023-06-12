@@ -78,7 +78,7 @@ dependencies {
     implementation 'org.apache.logging.log4j:log4j-core:2.20.0'
     implementation 'com.google.protobuf:protobuf-java:3.23.2'
     implementation 'com.google.protobuf:protobuf-java-util:3.23.2'
-    implementation 'com.google.guava:guava:32.0.0-jre'
+    implementation 'com.google.guava:guava:32.0.1-jre'
     implementation "io.grpc:grpc-core:1.55.1"
     implementation "io.grpc:grpc-stub:1.55.1"
     implementation "io.grpc:grpc-netty-shaded:1.55.1"
