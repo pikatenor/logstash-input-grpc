@@ -34,7 +34,7 @@ buildscript {
     dependencies {
         classpath 'gradle.plugin.com.github.johnrengelman:shadow:8.0.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.9.3'
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.9.4'
     }
 }
 
