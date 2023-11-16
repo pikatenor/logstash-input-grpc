@@ -7,7 +7,7 @@ on:
     - 'v[0-9]+.[0-9]+.[0-9]+*'
 
 env:
-  LOGSTASH_VERSION: v7.17.14
+  LOGSTASH_VERSION: v7.17.15
 
 jobs:
   release:
