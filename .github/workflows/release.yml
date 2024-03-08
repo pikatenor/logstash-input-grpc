@@ -47,7 +47,7 @@ jobs:
         arguments: gem -PLOGSTASH_CORE_PATH=${{ github.workspace }}/logstash/logstash-core
 
     - name: Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       with:
         prerelease: true
         files: |
