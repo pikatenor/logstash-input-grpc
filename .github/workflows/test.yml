@@ -14,7 +14,7 @@ on:
     branches: [ master ]
 
 env:
-  LOGSTASH_VERSION: v7.17.23
+  LOGSTASH_VERSION: v7.17.24
 
 jobs:
   test:
