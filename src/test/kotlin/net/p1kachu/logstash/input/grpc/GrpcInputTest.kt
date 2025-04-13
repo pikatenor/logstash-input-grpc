@@ -5,8 +5,8 @@ import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
-import org.logstash.plugins.ConfigurationImpl
 import java.util.function.Consumer
+import net.p1kachu.logstash.input.grpc.util.JNativeConfigurationImpl
 
 class GrpcInputTest {
     private lateinit var server: Server
@@ -28,7 +28,7 @@ class GrpcInputTest {
         val testName = "Logstashy"
         val testNumber = 5
 
-        val config = ConfigurationImpl(mapOf(
+        val config = JNativeConfigurationImpl(mapOf(
             Grpc.PROTOSET_PATH to "build/generated/source/proto/test/descriptor_set.desc",
             Grpc.HOSTNAME to "localhost",
             Grpc.PORT to server.port.toLong(),
