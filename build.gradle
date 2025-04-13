@@ -83,7 +83,7 @@ dependencies {
     implementation "io.grpc:grpc-core:1.71.0"
     implementation "io.grpc:grpc-stub:1.71.0"
     implementation "io.grpc:grpc-netty-shaded:1.71.0"
-    implementation fileTree(dir: LOGSTASH_CORE_PATH, include: "**/logstash-core-?.*.*.jar")
+    implementation fileTree(dir: LOGSTASH_CORE_PATH, include: "**/logstash-core.jar")
 
     testImplementation 'junit:junit:4.13.2'
     testImplementation "io.grpc:grpc-protobuf:1.71.0"
