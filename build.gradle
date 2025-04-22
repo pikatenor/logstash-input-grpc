@@ -26,6 +26,7 @@ targetCompatibility = 1.8
 
 buildscript {
     ext.kotlin_version = '2.1.20'
+    ext.snakeYamlVersion = '2.2' // ref. elastic/logstash/blob/main/build.gradle#L22 / elastic/logstash/blob/main/rubyUtils.gradle#L26
     repositories {
         mavenCentral()
         gradlePluginPortal()
@@ -82,7 +83,7 @@ dependencies {
     implementation "io.grpc:grpc-core:1.71.0"
     implementation "io.grpc:grpc-stub:1.71.0"
     implementation "io.grpc:grpc-netty-shaded:1.71.0"
-    implementation fileTree(dir: LOGSTASH_CORE_PATH, include: "**/logstash-core-?.*.*.jar")
+    implementation fileTree(dir: LOGSTASH_CORE_PATH, include: "**/logstash-core.jar")
 
     testImplementation 'junit:junit:4.13.2'
     testImplementation "io.grpc:grpc-protobuf:1.71.0"
