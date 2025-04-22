@@ -29,7 +29,7 @@ class GrpcInputTest {
         val testNumber = 5
 
         val config = JNativeConfigurationImpl(mapOf(
-            Grpc.PROTOSET_PATH to "build/generated/source/proto/test/descriptor_set.desc",
+            Grpc.PROTOSET_PATH to "build/generated/sources/proto/test/descriptor_set.desc",
             Grpc.HOSTNAME to "localhost",
             Grpc.PORT to server.port.toLong(),
             Grpc.RPC_NAME to "hello.MultiGreeter/SayHello",
