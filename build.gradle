@@ -21,8 +21,8 @@ pluginInfo.pluginClass     = "Grpc"
 pluginInfo.pluginName      = "grpc" // must match the @LogstashPlugin annotation in the main plugin class
 // ===========================================================================
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+sourceCompatibility = 11
+targetCompatibility = 11
 
 buildscript {
     ext.kotlin_version = '2.1.21'
@@ -143,11 +143,11 @@ tasks.register("gem"){
 }
 compileKotlin {
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
 }
 compileTestKotlin {
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
 }
