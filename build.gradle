@@ -25,7 +25,7 @@ sourceCompatibility = 11
 targetCompatibility = 11
 
 buildscript {
-    ext.kotlin_version = '2.1.21'
+    ext.kotlin_version = '2.2.0'
     ext.snakeYamlVersion = '2.2' // ref. elastic/logstash/blob/main/build.gradle#L22 / elastic/logstash/blob/main/rubyUtils.gradle#L26
     repositories {
         mavenCentral()
