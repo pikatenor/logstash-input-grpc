@@ -40,6 +40,22 @@ class TestGreeterServer : MultiGreeterGrpc.MultiGreeterImplBase() {
                             nestedString = "repeated_nested_string"
                         }.build())
                     }
+                    singleStringOneof = singleStringOneofBuilder.apply {
+                        string = "single_string_oneof"
+                    }.build()
+                    singleInt32Oneof = singleInt32OneofBuilder.apply {
+                        int32 = 14
+                    }.build()
+                    addRepeatedOneof(
+                        Hello.HelloReply.Oneof.newBuilder().apply {
+                            string = "repeated_oneof_string"
+                        }.build()
+                    )
+                    addRepeatedOneof(
+                        Hello.HelloReply.Oneof.newBuilder().apply {
+                            int32 = 15
+                        }.build()
+                    )
                 }.build()
             )
         }

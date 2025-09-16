@@ -43,8 +43,20 @@ message HelloReply {
   repeated string repeated_string = 19;
   repeated Data   repeated_nested = 20;
 
+  Oneof single_string_oneof = 21;
+  Oneof single_int32_oneof = 22;
+
+  repeated Oneof repeated_oneof = 23;
+
   message Data {
     string nested_string = 1;
+  }
+
+  message Oneof {
+    oneof string_or_int32 {
+      string string = 1;
+      int32  int32 = 2;
+    }
   }
 
   enum Enum {

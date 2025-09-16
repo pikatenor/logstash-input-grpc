@@ -153,3 +153,10 @@ compileTestKotlin {
         jvmTarget = "11"
     }
 }
+
+tasks.register("runTestServer", JavaExec) {
+    description = "Run the gRPC test server"
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass.set("run_test_server.Main")
+    args = []
+}

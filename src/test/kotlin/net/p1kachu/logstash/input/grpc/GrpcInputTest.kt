@@ -75,6 +75,11 @@ class GrpcInputTest {
             (it["repeated_nested"] as List<Map<String, Any>>).forEach { map ->
                 Assert.assertEquals("repeated_nested_string", map["nested_string"])
             }
+            Assert.assertEquals("single_string_oneof", (it["single_string_oneof"] as Map<String, Any>)["string"])
+            Assert.assertEquals(14, (it["single_int32_oneof"] as Map<String, Any>)["int32"])
+            Assert.assertEquals(2, (it["repeated_oneof"] as List<*>).count())
+            Assert.assertEquals("repeated_oneof_string", ((it["repeated_oneof"] as List<Map<String, Any>>)[0])["string"])
+            Assert.assertEquals(15, ((it["repeated_oneof"] as List<Map<String, Any>>)[1])["int32"])
         }
     }
 
