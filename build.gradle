@@ -3,6 +3,19 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING
 
 apply plugin: 'java'
 apply plugin: 'kotlin'
+
+buildscript {
+    dependencies {
+        classpath "org.yaml:snakeyaml:2.2"
+    }
+}
+
+// load versions.yml from core before loading rubyUtils.gradle
+import org.yaml.snakeyaml.Yaml
+
+def versionsFile = file(LOGSTASH_CORE_PATH + "/../versions.yml")
+gradle.ext.versions = new Yaml().load(versionsFile.text)
+
 apply from: LOGSTASH_CORE_PATH + "/../rubyUtils.gradle"
 
 // ===========================================================================
@@ -28,7 +41,6 @@ java {
 
 buildscript {
     ext.kotlin_version = '2.2.0'
-    ext.snakeYamlVersion = '2.2' // ref. elastic/logstash/blob/main/build.gradle#L22 / elastic/logstash/blob/main/rubyUtils.gradle#L26
     repositories {
         mavenCentral()
         gradlePluginPortal()
