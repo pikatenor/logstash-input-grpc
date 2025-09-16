@@ -21,8 +21,10 @@ pluginInfo.pluginClass     = "Grpc"
 pluginInfo.pluginName      = "grpc" // must match the @LogstashPlugin annotation in the main plugin class
 // ===========================================================================
 
-sourceCompatibility = 11
-targetCompatibility = 11
+java {
+    sourceCompatibility = 11
+    targetCompatibility = 11
+}
 
 buildscript {
     ext.kotlin_version = '2.2.0'
