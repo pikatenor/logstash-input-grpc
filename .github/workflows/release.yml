@@ -35,14 +35,12 @@ jobs:
     - name: Build logstash-core
       uses: gradle/gradle-build-action@v3.5.0
       with:
-        gradle-version: current
         build-root-directory: logstash
         arguments: assemble
     
     - name: Build gem
       uses: gradle/gradle-build-action@v3.5.0
       with:
-        gradle-version: current
         build-root-directory: logstash-input-grpc
         arguments: gem -PLOGSTASH_CORE_PATH=${{ github.workspace }}/logstash/logstash-core
 
