@@ -143,7 +143,7 @@ class Grpc(private val id: String, config: Configuration, context: Context?) : I
         return id
     }
 
-    companion object {
+    companion object KtCompanion {
         @JvmField
         val PROTOSET_PATH: PluginConfigSpec<String?> = PluginConfigSpec.requiredStringSetting("protoset_path")
         @JvmField
