@@ -94,7 +94,7 @@ dependencies {
     implementation 'com.google.protobuf:protobuf-java:4.34.1'
     implementation 'com.google.protobuf:protobuf-java-util:4.34.1'
     implementation 'com.google.guava:guava:33.6.0-jre'
-    implementation 'com.google.code.gson:gson:2.13.2'
+    implementation 'com.google.code.gson:gson:2.14.0'
     implementation "io.grpc:grpc-core:1.80.0"
     implementation "io.grpc:grpc-stub:1.80.0"
     implementation "io.grpc:grpc-netty-shaded:1.80.0"
