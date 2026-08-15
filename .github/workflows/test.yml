@@ -14,7 +14,7 @@ on:
     branches: [ master ]
 
 env:
-  LOGSTASH_VERSION: v8.19.19
+  LOGSTASH_VERSION: v8.19.20
 
 jobs:
   test:
