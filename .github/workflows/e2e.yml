@@ -1,0 +1,115 @@
+name: E2E test (Logstash + gRPC server)
+
+on:
+  workflow_dispatch:
+
+env:
+  LOGSTASH_VERSION: v8.19.21
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      with:
+        path: logstash-input-grpc
+
+    - name: Checkout Logstash
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      with:
+        repository: elastic/logstash
+        ref: ${{ env.LOGSTASH_VERSION }}
+        path: logstash
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v6
+      with:
+        java-version: 17
+        distribution: temurin
+
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
+
+    - name: Build logstash-core
+      working-directory: logstash
+      run: ./gradlew assemble
+
+    - name: Build gem and test fixtures
+      working-directory: logstash-input-grpc
+      run: >-
+        ./gradlew gem generateTestProto testClasses
+        -PLOGSTASH_CORE_PATH=${{ github.workspace }}/logstash/logstash-core
+
+    - name: Download Logstash distribution
+      run: |
+        LOGSTASH_DIST_VERSION="${LOGSTASH_VERSION#v}"
+        curl -fsSL -o logstash-dist.tar.gz \
+          "https://artifacts.elastic.co/downloads/logstash/logstash-${LOGSTASH_DIST_VERSION}-linux-x86_64.tar.gz"
+        tar -xzf logstash-dist.tar.gz
+        echo "LOGSTASH_HOME=${GITHUB_WORKSPACE}/logstash-${LOGSTASH_DIST_VERSION}" >> "$GITHUB_ENV"
+
+    - name: Install plugin into Logstash
+      run: |
+        "${LOGSTASH_HOME}/bin/logstash-plugin" install \
+          "${GITHUB_WORKSPACE}/logstash-input-grpc/logstash-input-grpc-"*.gem
+
+    - name: Verify plugin is registered
+      run: |
+        "${LOGSTASH_HOME}/bin/logstash-plugin" list | grep -x logstash-input-grpc
+
+    - name: Start gRPC test server
+      working-directory: logstash-input-grpc
+      run: |
+        nohup ./gradlew runTestServer \
+          -PLOGSTASH_CORE_PATH="${GITHUB_WORKSPACE}/logstash/logstash-core" \
+          > "${GITHUB_WORKSPACE}/server.log" 2>&1 &
+
+    - name: Wait for gRPC test server
+      run: |
+        for i in $(seq 1 60); do
+          if grep -q "server listening at port 50051" "${GITHUB_WORKSPACE}/server.log"; then
+            echo "test server is up"
+            exit 0
+          fi
+          sleep 5
+        done
+        echo "test server did not start in time"
+        cat "${GITHUB_WORKSPACE}/server.log"
+        exit 1
+
+    - name: Run Logstash with grpc input
+      run: |
+        cat > "${GITHUB_WORKSPACE}/pipeline.conf" <<EOF
+        input {
+          grpc {
+            protoset_path => "${GITHUB_WORKSPACE}/logstash-input-grpc/build/generated/sources/proto/test/descriptor_set.desc"
+            host => "127.0.0.1"
+            port => 50051
+            rpc => "hello.MultiGreeter/SayHello"
+            use_tls => false
+            message_json => '{"data": {"name": "Logstashy"}, "number": 5}'
+          }
+        }
+        output {
+          file {
+            path => "${GITHUB_WORKSPACE}/output.json"
+            codec => json_lines
+          }
+        }
+        EOF
+        timeout 300 "${LOGSTASH_HOME}/bin/logstash" -f "${GITHUB_WORKSPACE}/pipeline.conf"
+
+    - name: Assert events
+      run: |
+        test -f "${GITHUB_WORKSPACE}/output.json"
+        jq -e -s 'length == 5
+                  and all(.[]; .message == "Hello, Logstashy!")
+                  and all(.[]; .nested.nested_string == "nested_string")
+                  and all(.[]; .bytes_value == "MTY=")' "${GITHUB_WORKSPACE}/output.json"
+
+    - name: Stop gRPC test server
+      if: always()
+      run: |
+        lsof -t -i :50051 | xargs -r kill || true
