@@ -43,6 +43,13 @@ jobs:
       working-directory: logstash-input-grpc
       run: ./gradlew gem -PLOGSTASH_CORE_PATH=${{ github.workspace }}/logstash/logstash-core
 
+    - name: Strip -java suffix from gem filename
+      working-directory: logstash-input-grpc
+      run: |
+        for f in logstash-input-grpc-*-java.gem; do
+          mv -- "$f" "${f%-java.gem}.gem"
+        done
+
     - name: Release
       uses: softprops/action-gh-release@v3
       with:
